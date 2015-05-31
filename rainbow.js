@@ -1,4 +1,4 @@
-( function () {
+( function() {
 
     var numRange = 100;
 
@@ -12,7 +12,7 @@
 
     Rainbow.prototype = {
 
-        setColors: function ( spectrum ) {
+        setColors: function( spectrum ) {
 
             var increment = this._segmentLength = numRange / ( spectrum.length - 1 );
 
@@ -32,7 +32,7 @@
 
         },
 
-        colorAt: function ( ratio, inRgb ) {
+        colorAt: function( ratio, inRgb ) {
 
             var number = ratio * numRange;
             var index = Math.min( Math.floor( number / this._segmentLength ), this._gradients.length - 1 );
@@ -47,17 +47,18 @@
         this._endColor = getHexColor( colorEnd );
         this._minNumber = minNumber;
         this._maxNumber = maxNumber;
+        this._range = this._maxNumber - this._minNumber;
     }
 
     ColorGradient.prototype = {
 
-        colorAt: function ( number, inRgb ) {
+        colorAt: function( number, inRgb ) {
 
             var r = this.calcInt( number, this._startColor.substring( 0, 2 ), this._endColor.substring( 0, 2 ) );
             var g = this.calcInt( number, this._startColor.substring( 2, 4 ), this._endColor.substring( 2, 4 ) );
             var b = this.calcInt( number, this._startColor.substring( 4, 6 ), this._endColor.substring( 4, 6 ) );
 
-            if ( inRgb === true ) {
+            if ( inRgb ) {
                 return [ r, g, b ];
             } else {
                 return calcHex( r ) + calcHex( g ) + calcHex( b );
@@ -65,14 +66,19 @@
 
         },
 
-        calcInt: function ( number, channelStart_Base16, channelEnd_Base16 ) {
+        calcInt: function( number, channelStart_Base16, channelEnd_Base16 ) {
 
-            var num = Math.min( Math.max( number, this._minNumber ), this._maxNumber );
-            var numRange = this._maxNumber - this._minNumber;
+            var num = number;
+
+            if ( number < this._minNumber ) {
+                num = this._minNumber;
+            } else if ( number > this._maxNumber ) {
+                num = this._maxNumber;
+            }
 
             var cStart_Base10 = parseInt( channelStart_Base16, 16 );
             var cEnd_Base10 = parseInt( channelEnd_Base16, 16 );
-            var cPerUnit = ( cEnd_Base10 - cStart_Base10 ) / numRange;
+            var cPerUnit = ( cEnd_Base10 - cStart_Base10 ) / this._range;
             var c_Base10 = Math.round( cPerUnit * ( num - this._minNumber ) + cStart_Base10 );
 
             return c_Base10;
